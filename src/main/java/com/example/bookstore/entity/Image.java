@@ -13,14 +13,13 @@ public class Image {
     private long id;
     @Column
     private String fileURL;
-    @Column
-    private boolean inProgress;
+    @Enumerated(EnumType.STRING)
+    private Status status;
     @Column
     private Timestamp downloadStart;
     @Column
     private Timestamp downloadEnd;
-    @Column
-    private Boolean downloaded;
+
 
     public Image() {
 
@@ -43,21 +42,15 @@ public class Image {
         this.fileURL = fileURL;
     }
 
-    public boolean isInProgress() {
-        return inProgress;
+    public Status getStatus() {
+        return status;
     }
 
-    public void setInProgress(boolean inProgress) {
-        this.inProgress = inProgress;
+    public void setStatus(Status status) {
+        this.status = status;
     }
 
-    public Boolean isDownloaded() {
-        return downloaded;
-    }
 
-    public void setDownloaded(Boolean downloaded) {
-        this.downloaded = downloaded;
-    }
 
     public Timestamp getDownloadStart() {
         return downloadStart;

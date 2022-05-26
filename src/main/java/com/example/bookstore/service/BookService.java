@@ -1,5 +1,6 @@
 package com.example.bookstore.service;
 
+import com.example.bookstore.dto.BookDto;
 import com.example.bookstore.entity.Author;
 import com.example.bookstore.entity.Book;
 import com.example.bookstore.dto.BookCSV;
@@ -10,6 +11,11 @@ import com.example.bookstore.repository.BookRepository;
 import com.example.bookstore.repository.ImageRepository;
 import com.example.bookstore.repository.PublisherRepository;
 import com.opencsv.bean.CsvToBeanBuilder;
+import org.apache.commons.io.IOUtils;
+import org.springframework.core.io.ClassPathResource;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -17,6 +23,8 @@ import org.springframework.web.multipart.MultipartFile;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
+
+import static jdk.xml.internal.SecuritySupport.getResourceAsStream;
 
 @Service
 public class BookService {
@@ -78,5 +86,29 @@ public class BookService {
                 .build()
                 .parse();
         return books;
+    }
+    public List<BookDto> getBooksWithMoreThanOneAuthor(int pageNo, int pageSize){
+        Pageable paging = PageRequest.of(pageNo, pageSize);
+        Page<BookDto> pagedResult = bookRepository.findBooksWithMoreThanOneAuthor(paging).map(BookDto::mapBookEntityToBookDto);
+        if(pagedResult.hasContent())
+            return pagedResult.getContent();
+        else
+            return new ArrayList<BookDto>();
+
+    }
+    public List<BookDto> getMostPopularBooks(){
+
+        List<Book> books = bookRepository.findMostPopular();
+        return BookDto.mapBookEntityToBookDto(books);
+
+    }
+    public ClassPathResource getImageByBookTitle(String title) throws IOException {
+//        System.out.println(imageRepository.findImageUrl(title).getFileURL());
+        String url = imageRepository.findImageUrl(title).getFileURL();
+        ClassPathResource imgFile = new ClassPathResource(url);
+        return imgFile;
+//        InputStream in = BookService.class
+//                .getResourceAsStream(url);
+//        return IOUtils.toByteArray(in);
     }
 }

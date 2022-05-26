@@ -1,8 +1,10 @@
 package com.example.bookstore.service;
 
 import com.example.bookstore.entity.Image;
+import com.example.bookstore.entity.Status;
 import com.example.bookstore.repository.ImageRepository;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -30,16 +32,19 @@ public class DownloadService {
 //    @Scheduled(fixedRate = 3000)
 
     public void download() throws IOException {
-        List<Image> images = imageRepository.findProcessed();
+        List<Image> images = imageRepository.findNotDownloaded("NOT_DOWNLOADED");
         System.out.println(">>>>>>>>>>>>> image count: " + images.size());
         for (Image image : images) {
             try (InputStream in = new URL(image.getFileURL()).openStream()) {
+                imageService.updateImageStatus(image.getId(), Status.IN_PROGRESS);
                 imageService.updateDownloadStart(image.getId(), new Timestamp(System.currentTimeMillis()));
                 Files.copy(in, Paths.get(basePath + "/" + image.getId() + ".jpg"), StandardCopyOption.REPLACE_EXISTING);
             } catch (IOException e) {
+                image.setStatus(Status.FAILED);
                 continue;
             }
-            imageService.updateImage(image.getId());
+//            imageService.updateImage(image.getId());
+            imageService.updateImageStatus(image.getId(),Status.DOWNLOADED);
             imageService.updateDownloadEnd(image.getId(), new Timestamp(System.currentTimeMillis()));
             System.out.println(">>>>>>>>>>>>>>>> image downloaded, image id = " + image.getId());
         }

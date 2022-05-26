@@ -1,6 +1,7 @@
 package com.example.bookstore.service;
 
 import com.example.bookstore.entity.Image;
+import com.example.bookstore.entity.Status;
 import com.example.bookstore.repository.ImageRepository;
 import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
@@ -21,14 +22,14 @@ public class ImageService {
 
     private final ImageRepository imageRepository;
 
-    public ImageService(ImageRepository imageRepository, Environment environment) {
+    public ImageService(ImageRepository imageRepository) {
         this.imageRepository = imageRepository;
     }
 
     @Transactional
-    public Image updateImage(long id) {
+    public Image updateImageStatus(long id, Status status) {
         Image image = imageRepository.findById(id);
-        image.setInProgress(true);
+        image.setStatus(status);
         return imageRepository.save(image);
     }
 

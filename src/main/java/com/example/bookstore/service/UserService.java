@@ -1,6 +1,6 @@
 package com.example.bookstore.service;
 
-import com.example.bookstore.dto.UserDto;
+import com.example.bookstore.dto.UserCSVDto;
 import com.example.bookstore.dto.UserRatingDto;
 import com.example.bookstore.entity.*;
 import com.example.bookstore.repository.BookRatingRepository;
@@ -33,26 +33,26 @@ public class UserService {
         this.bookRatingRepository = bookRatingRepository;
     }
 
-    public List<UserDto> createUsers(List<UserDto> userDtos){
-        List<UserEntity> userList = userRepository.saveAll(UserDto.mapUserDtoToUserEntity(userDtos));
-        return UserDto.mapUserEntityToUserDto(userList);
+    public List<UserCSVDto> createUsers(List<UserCSVDto> userCSVDtos){
+        List<UserEntity> userList = userRepository.saveAll(UserCSVDto.mapUserDtoToUserEntity(userCSVDtos));
+        return UserCSVDto.mapUserEntityToUserDto(userList);
     }
 
-    public List<UserDto> getUsersPage(int pageNo,int pageSize,String sortBy){
+    public List<UserCSVDto> getUsersPage(int pageNo, int pageSize, String sortBy){
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
-        Page<UserDto> pagedResult = userRepository.findUsersWithNoRatings(paging).map(UserDto::mapUserEntityToUserDto);
+        Page<UserCSVDto> pagedResult = userRepository.findUsersWithNoRatings(paging).map(UserCSVDto::mapUserEntityToUserDto);
         if(pagedResult.hasContent())
             return pagedResult.getContent();
         else
-            return new ArrayList<UserDto>();
+            return new ArrayList<UserCSVDto>();
 
     }
-    public List<UserDto> uploadUserCSV(MultipartFile file) throws IOException {
+    public List<UserCSVDto> uploadUserCSV(MultipartFile file) throws IOException {
         BufferedReader fileReader = new BufferedReader(new
                 InputStreamReader(file.getInputStream(), "UTF-8"));
 
-        List<UserDto> users = new CsvToBeanBuilder<UserDto>(fileReader)
-                .withType(UserDto.class)
+        List<UserCSVDto> users = new CsvToBeanBuilder<UserCSVDto>(fileReader)
+                .withType(UserCSVDto.class)
                 .withSeparator(';')
                 .withIgnoreEmptyLine(true)
                 .withSkipLines(1)
@@ -61,9 +61,9 @@ public class UserService {
         return users;
     }
     @Async
-    public List<UserDto> saveEntities(final MultipartFile file) throws IOException {
-        List<UserDto> userDtos = uploadUserCSV(file);
-        return createUsers(userDtos);
+    public List<UserCSVDto> saveEntities(final MultipartFile file) throws IOException {
+        List<UserCSVDto> userCSVDtos = uploadUserCSV(file);
+        return createUsers(userCSVDtos);
     }
     public List<UserRatingDto> uploadRatings(MultipartFile file) throws IOException{
         BufferedReader fileReader = new BufferedReader(new

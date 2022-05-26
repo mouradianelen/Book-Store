@@ -10,6 +10,9 @@ import java.util.List;
 import java.util.Optional;
 
 public interface UserRepository extends JpaRepository<UserEntity,Long> {
+
+    UserEntity findByUsername(String username);
+    UserEntity findByEmail(String email);
     @Query(
             value = "SELECT * FROM bookstore.store_user u WHERE u.user_id = :id",
             nativeQuery = true)

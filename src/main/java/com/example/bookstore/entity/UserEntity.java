@@ -21,6 +21,18 @@ public class UserEntity implements Serializable {
     private int age;
     @Column(nullable = false)
     private String location;
+    @Column
+    private String name;
+    @Column
+    private String lastName;
+    @Column
+    private String username;
+    @Column
+    private String email;
+    @Column
+    private String password;
+    @Column
+    private boolean enabled = false;
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role", schema = "bookstore",
             joinColumns = @JoinColumn(name = "user_id"),
@@ -38,6 +50,9 @@ public class UserEntity implements Serializable {
     public void setRoles(Set<UserRole> roles) {
         this.roles = roles;
     }
+    public void setRole(UserRole role){
+        this.roles.add(role);
+    }
 
     public Set<BookOrder> getOrders() {
         return orders;
@@ -45,6 +60,14 @@ public class UserEntity implements Serializable {
 
     public void setOrders(Set<BookOrder> orders) {
         this.orders = orders;
+    }
+
+    public boolean isEnabled() {
+        return enabled;
+    }
+
+    public void setEnabled(boolean enabled) {
+        this.enabled = enabled;
     }
 
     public Set<BookRating> getRatings() {
@@ -88,4 +111,43 @@ public class UserEntity implements Serializable {
         this.location = location;
     }
 
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getEmail() {
+        return email;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
+    }
+
+    public void setEmail(String email) {
+        this.email = email;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
+    }
 }

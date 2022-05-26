@@ -18,6 +18,9 @@ public class Publisher implements Serializable {
     public Publisher(){
 
     }
+    public Publisher(String name){
+        this.publisherName = name;
+    }
 
 
     public long getPublisherId() {

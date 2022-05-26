@@ -1,55 +1,95 @@
 package com.example.bookstore.dto;
 
 import com.example.bookstore.entity.UserEntity;
-import com.opencsv.bean.CsvBindByPosition;
+import com.example.bookstore.entity.UserRole;
+import com.sun.istack.NotNull;
 
-import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Email;
+import javax.validation.constraints.NotEmpty;
 import java.util.List;
+import java.util.Objects;
 import java.util.stream.Collectors;
+
 
 public class UserDto {
     @NotNull
-    @CsvBindByPosition(position = 0)
-    private long userId;
+    @NotEmpty
+    private String name;
+
     @NotNull
-    @CsvBindByPosition(position = 1)
-    private String location;
+    @NotEmpty
+    private String lastName;
+
     @NotNull
-    @CsvBindByPosition(position = 2)
-    private String age;
-    public long getId() {
-        return userId;
+    @NotEmpty
+    private String password;
+    @Email
+    @NotNull
+    @NotEmpty
+    private String email;
+
+    private String username;
+
+    public String getUsername() {
+        return username;
     }
 
-    public void setUserId(long userId) {
-        this.userId = userId;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
-    public String getAge() {
-        return age;
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
+    }
+
+    public String getPassword() {
+        return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
 
-    public void setAge(String age){
-        if(age.equals("NULL"))
-            this.setAge("18");
-        else{
-        this.age = age;
-        }
+    public String getEmail() {
+        return email;
     }
 
-    public String getLocation() {
-        return location;
+    public void setEmail(String email) {
+        this.email = email;
     }
 
-    public void setLocation(String location) {
-        this.location = location;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        UserDto userDTO = (UserDto) o;
+        return Objects.equals(password, userDTO.password) && Objects.equals(email, userDTO.email);
     }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(password, email);
+    }
+
     public static UserDto mapUserEntityToUserDto(UserEntity userEntity) {
         UserDto userDto = new UserDto();
-        userDto.setUserId(userEntity.getUserId());
-        userDto.setAge(String.valueOf(userEntity.getAge()));
-        userDto.setLocation(userEntity.getLocation());
+        userDto.setEmail(userEntity.getEmail());
+        userDto.setName(userEntity.getName());
+        userDto.setLastName(userEntity.getLastName());
+        userDto.setUsername(userEntity.getUsername());
 
         return userDto;
     }
@@ -62,11 +102,12 @@ public class UserDto {
     }
 
     public static UserEntity mapUserDtoToUserEntity(UserDto userDto) {
-        UserEntity userEntity = new UserEntity();
-        userEntity.setUserId(userDto.getId());
-        userEntity.setAge(Integer.parseInt(userDto.getAge()));
-        userEntity.setLocation(userDto.getLocation());
-
-        return userEntity;
+        UserEntity user = new UserEntity();
+        user.setName(userDto.getName());
+        user.setLastName(userDto.getLastName());
+        user.setEmail(userDto.getEmail());
+        user.setUsername(userDto.getUsername());
+        return user;
     }
+
 }

@@ -1,6 +1,6 @@
 package com.example.bookstore.entity;
 
-public enum State {
+public enum Status {
     IN_PROGRESS,
     DOWNLOADED,
     FAILED,

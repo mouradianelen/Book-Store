@@ -22,10 +22,10 @@ public class ImageController {
         this.downloadService = downloadService;
     }
 
-    @PutMapping("/{id}")
-    public ResponseEntity<Image> updateImage(@PathVariable Long id) {
-        return ResponseEntity.ok().body(imageService.updateImage(id));
-    }
+//    @PutMapping("/{id}")
+//    public ResponseEntity<Image> updateImage(@PathVariable Long id) {
+//        return ResponseEntity.ok().body(imageService.updateImage(id));
+//    }
 //    @GetMapping()
 //    public ResponseEntity<?> updateImage() throws IOException {
 //        downloadService.download();
