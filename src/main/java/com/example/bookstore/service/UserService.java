@@ -2,7 +2,9 @@ package com.example.bookstore.service;
 
 import com.example.bookstore.dto.UserCSVDto;
 import com.example.bookstore.dto.UserRatingDto;
-import com.example.bookstore.entity.*;
+import com.example.bookstore.entity.Book;
+import com.example.bookstore.entity.BookRating;
+import com.example.bookstore.entity.UserEntity;
 import com.example.bookstore.repository.BookRatingRepository;
 import com.example.bookstore.repository.BookRepository;
 import com.example.bookstore.repository.UserRepository;
@@ -33,20 +35,21 @@ public class UserService {
         this.bookRatingRepository = bookRatingRepository;
     }
 
-    public List<UserCSVDto> createUsers(List<UserCSVDto> userCSVDtos){
+    public List<UserCSVDto> createUsers(List<UserCSVDto> userCSVDtos) {
         List<UserEntity> userList = userRepository.saveAll(UserCSVDto.mapUserDtoToUserEntity(userCSVDtos));
         return UserCSVDto.mapUserEntityToUserDto(userList);
     }
 
-    public List<UserCSVDto> getUsersPage(int pageNo, int pageSize, String sortBy){
+    public List<UserCSVDto> getUsersPage(int pageNo, int pageSize, String sortBy) {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<UserCSVDto> pagedResult = userRepository.findUsersWithNoRatings(paging).map(UserCSVDto::mapUserEntityToUserDto);
-        if(pagedResult.hasContent())
+        if (pagedResult.hasContent())
             return pagedResult.getContent();
         else
             return new ArrayList<UserCSVDto>();
 
     }
+
     public List<UserCSVDto> uploadUserCSV(MultipartFile file) throws IOException {
         BufferedReader fileReader = new BufferedReader(new
                 InputStreamReader(file.getInputStream(), "UTF-8"));
@@ -60,12 +63,14 @@ public class UserService {
                 .parse();
         return users;
     }
+
     @Async
     public List<UserCSVDto> saveEntities(final MultipartFile file) throws IOException {
         List<UserCSVDto> userCSVDtos = uploadUserCSV(file);
         return createUsers(userCSVDtos);
     }
-    public List<UserRatingDto> uploadRatings(MultipartFile file) throws IOException{
+
+    public List<UserRatingDto> uploadRatings(MultipartFile file) throws IOException {
         BufferedReader fileReader = new BufferedReader(new
                 InputStreamReader(file.getInputStream(), "UTF-8"));
 
@@ -79,69 +84,28 @@ public class UserService {
         return ratings;
     }
 
-    public void saveRatings(final MultipartFile file) throws IOException{
+    public void saveRatings(final MultipartFile file) throws IOException {
         List<UserRatingDto> userRatingDtos = uploadRatings(file);
-
-        // Split the list into batches
         getBatches(userRatingDtos, 5000).forEach(this::processBatch);
-//        Stack<BookRating> ratings = new Stack<>();
-//        List<UserEntity> users = userRepository.findAll();
-//        List<Book> books = bookRepository.findAll();
-//        userRatingDtos.parallelStream().forEach(bookRating->{
-//            UserEntity user = userRepository.findByUserId(bookRating.getUserId());
-//            bookRepository.findByISBN(bookRating.getBookISBN()).ifPresent(book -> {
-//                BookRating bookRating1 = new BookRating();
-//                bookRating1.setRating(bookRating.getBookRating());
-//                bookRating1.setUser(user);
-//                bookRating1.setBook(book);
-//                book.getRatings().add(bookRating1);
-//                user.getRatings().add(bookRating1);
-//                bookRatingRepository.save(bookRating1);
-//            });
-//
-//        });
-////        userRatingDtos.forEach(bookRating->{
-//            UserEntity user = users.stream().filter(user1->bookRating.getUserId()==user1.getUserId()).findAny().orElse(null);
-//            books.stream().filter(book1->bookRating.getBookISBN().equals(book1.getISBN())).findAny()
-//                    .ifPresent( book -> {
-//                        BookRating bookRating1 = new BookRating();
-//                        bookRating1.setRating(bookRating.getBookRating());
-//                        bookRating1.setUser(user);
-//                        bookRating1.setBook(book);
-//                        book.getRatings().add(bookRating1);
-//                        user.getRatings().add(bookRating1);
-//                        bookRatingRepository.save(bookRating1);
-//                    });
-//
-//
-//        });
-
-
-
     }
+
     private void processBatch(List<UserRatingDto> userRatingBatch) {
 
-        // Retrieve all data required to process a batch
-        Map<Long, UserEntity> users = userRepository
-                .findAllByIdIn(userRatingBatch.stream()
-                        .map(UserRatingDto::getUserId).collect(Collectors.toList()))
-                .stream().filter(Optional :: isPresent)
-                .map(Optional::get)
-                .collect(Collectors.toMap(UserEntity::getId, user -> user));
+        List<Long> userIds = userRatingBatch.stream()
+                .map(UserRatingDto::getUserId).collect(Collectors.toList());
+        List<UserEntity> users = userRepository.findAllByIdIn(userIds);
         Map<String, Book> books = bookRepository
                 .findAllByISBNIn(userRatingBatch.stream()
                         .map(UserRatingDto::getBookISBN).collect(Collectors.toList()))
-                .stream().filter(Optional :: isPresent)
+                .stream().filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toMap(Book::getISBN, book -> book));
-
-        // Process each rating in memory
         List<BookRating> ratingsToSave = userRatingBatch.stream().map(bookRatingDto -> {
             Book book = books.get(bookRatingDto.getBookISBN());
             if (book == null) {
                 return null;
             }
-            UserEntity user = users.get(bookRatingDto.getUserId());
+            UserEntity user = users.stream().filter(userEntity -> userEntity.getUserId() == bookRatingDto.getUserId()).findFirst().orElse(null);
             BookRating bookRating = new BookRating();
             bookRating.setRating(bookRatingDto.getBookRating());
             bookRating.setUser(user);
@@ -151,10 +115,9 @@ public class UserService {
             return bookRating;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
-        // Save data in batches
         bookRatingRepository.saveAll(ratingsToSave);
         bookRepository.saveAll(books.values());
-        userRepository.saveAll(users.values());
+        userRepository.saveAll(users);
 
     }
 

@@ -28,13 +28,19 @@ public interface BookRepository extends JpaRepository<Book, String> {
             nativeQuery = true)
     Page<Book> findBooksWithMoreThanOneAuthor(Pageable paging);
 
-    @Query(value = "SELECT r.book_id, b.*, AVG(r.rating) as average_rating\n" +
-            "FROM bookstore.book b\n" +
-            "INNER JOIN bookstore.book_rating as r ON r.book_id = b.book_id\n" +
-            "GROUP BY b.book_id,r.book_id \n" +
-            "ORDER BY average_rating DESC\n" +
-            "LIMIT 20", nativeQuery = true)
-    List<Book> findMostPopular();
+//    @Query(value = "SELECT r.book_id, b.*, AVG(r.rating) as average_rating\n" +
+//            "FROM bookstore.book b\n" +
+//            "INNER JOIN bookstore.book_rating as r ON r.book_id = b.book_id\n" +
+//            "GROUP BY b.book_id,r.book_id \n" +
+//            "ORDER BY average_rating DESC\n" +
+//            "LIMIT 20", nativeQuery = true)
+@Query(value = "SELECT r.book_id, b.*, AVG(r.rating) as average_rating\n" +
+        "FROM bookstore.book b\n" +
+        "INNER JOIN bookstore.book_rating as r ON r.book_id = b.book_id\n" +
+        "GROUP BY b.book_id,r.book_id \n" +
+        "ORDER BY average_rating DESC\n" +
+        "LIMIT 20", nativeQuery = true)
+List<Book> findMostPopular();
 
 
 }

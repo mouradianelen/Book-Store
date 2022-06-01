@@ -4,6 +4,7 @@ import com.example.bookstore.dto.UserDto;
 import com.example.bookstore.entity.UserEntity;
 import com.example.bookstore.entity.UserRole;
 import com.example.bookstore.exceptions.EmailAlreadyExistsException;
+import com.example.bookstore.exceptions.UsernameAlreadyExistsException;
 import com.example.bookstore.repository.RoleRepository;
 import com.example.bookstore.repository.UserRepository;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -26,11 +27,13 @@ public class AuthenticationService {
         if (userRepository.findByEmail(userDTO.getEmail()) != null) {
             throw new EmailAlreadyExistsException(userDTO.getEmail());
         }
+        if (userRepository.findByUsername(userDTO.getUsername()) != null) {
+            throw new UsernameAlreadyExistsException(userDTO.getUsername());
+        }
 
         UserEntity user = UserDto.mapUserDtoToUserEntity(userDTO);
 
-        UserRole role = new UserRole();
-        role.setName("ROLE_USER");
+        UserRole role = roleRepository.findByName("ROLE_USER");
         user.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         user.setEnabled(true);
         user.setRole(role);

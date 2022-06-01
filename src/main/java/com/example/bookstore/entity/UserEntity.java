@@ -32,7 +32,7 @@ public class UserEntity implements Serializable {
     @Column
     private String password;
     @Column
-    private boolean enabled = false;
+    private Boolean enabled = false;
     @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
     @JoinTable(name = "user_role", schema = "bookstore",
             joinColumns = @JoinColumn(name = "user_id"),

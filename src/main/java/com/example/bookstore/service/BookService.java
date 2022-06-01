@@ -11,16 +11,17 @@ import com.example.bookstore.repository.BookRepository;
 import com.example.bookstore.repository.ImageRepository;
 import com.example.bookstore.repository.PublisherRepository;
 import com.opencsv.bean.CsvToBeanBuilder;
-import org.apache.commons.io.IOUtils;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.scheduling.annotation.Async;
+import org.springframework.security.access.annotation.Secured;
 import org.springframework.stereotype.Service;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -96,19 +97,23 @@ public class BookService {
             return new ArrayList<BookDto>();
 
     }
-    public List<BookDto> getMostPopularBooks(){
 
+    public List<BookDto> getMostPopularBooks(){
         List<Book> books = bookRepository.findMostPopular();
         return BookDto.mapBookEntityToBookDto(books);
 
     }
-    public ClassPathResource getImageByBookTitle(String title) throws IOException {
+    public byte[]  getImageByBookTitle(String title) throws IOException {
 //        System.out.println(imageRepository.findImageUrl(title).getFileURL());
         String url = imageRepository.findImageUrl(title).getFileURL();
-        ClassPathResource imgFile = new ClassPathResource(url);
-        return imgFile;
-//        InputStream in = BookService.class
-//                .getResourceAsStream(url);
-//        return IOUtils.toByteArray(in);
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+            byte[] responseEntity = restTemplate.getForObject(url, String.class).getBytes(StandardCharsets.UTF_8);
+            if (responseEntity != null) {
+                return responseEntity;
+            }
+        } catch (Exception e) {
+        }
+        return new byte[0];
     }
 }

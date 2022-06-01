@@ -3,7 +3,6 @@ package com.example.bookstore.service;
 import com.example.bookstore.entity.Image;
 import com.example.bookstore.entity.Status;
 import com.example.bookstore.repository.ImageRepository;
-import org.springframework.core.env.Environment;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
