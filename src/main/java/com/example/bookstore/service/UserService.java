@@ -8,12 +8,13 @@ import com.example.bookstore.entity.UserEntity;
 import com.example.bookstore.repository.BookRatingRepository;
 import com.example.bookstore.repository.BookRepository;
 import com.example.bookstore.repository.UserRepository;
+import com.example.bookstore.service.util.ServiceUtil;
 import com.opencsv.bean.CsvToBeanBuilder;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,23 +22,23 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.util.*;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserService {
     private final UserRepository userRepository;
     private final BookRepository bookRepository;
     private final BookRatingRepository bookRatingRepository;
+    private final ExecutorService executor = Executors.newFixedThreadPool(4);
 
-    public UserService(UserRepository userRepository, BookRepository bookRepository, BookRatingRepository bookRatingRepository) {
-        this.userRepository = userRepository;
-        this.bookRepository = bookRepository;
-        this.bookRatingRepository = bookRatingRepository;
-    }
 
     public List<UserCSVDto> createUsers(List<UserCSVDto> userCSVDtos) {
         List<UserEntity> userList = userRepository.saveAll(UserCSVDto.mapUserDtoToUserEntity(userCSVDtos));
-        return UserCSVDto.mapUserEntityToUserDto(userList);
+        return UserCSVDto.mapUserEntityToUserDto(userList).subList(0, 20);
     }
 
     public List<UserCSVDto> getUsersPage(int pageNo, int pageSize, String sortBy) {
@@ -46,7 +47,7 @@ public class UserService {
         if (pagedResult.hasContent())
             return pagedResult.getContent();
         else
-            return new ArrayList<UserCSVDto>();
+            return new ArrayList<>();
 
     }
 
@@ -54,17 +55,16 @@ public class UserService {
         BufferedReader fileReader = new BufferedReader(new
                 InputStreamReader(file.getInputStream(), "UTF-8"));
 
-        List<UserCSVDto> users = new CsvToBeanBuilder<UserCSVDto>(fileReader)
+        return new CsvToBeanBuilder<UserCSVDto>(fileReader)
                 .withType(UserCSVDto.class)
                 .withSeparator(';')
                 .withIgnoreEmptyLine(true)
                 .withSkipLines(1)
                 .build()
                 .parse();
-        return users;
+
     }
 
-    @Async
     public List<UserCSVDto> saveEntities(final MultipartFile file) throws IOException {
         List<UserCSVDto> userCSVDtos = uploadUserCSV(file);
         return createUsers(userCSVDtos);
@@ -74,23 +74,37 @@ public class UserService {
         BufferedReader fileReader = new BufferedReader(new
                 InputStreamReader(file.getInputStream(), "UTF-8"));
 
-        List<UserRatingDto> ratings = new CsvToBeanBuilder<UserRatingDto>(fileReader)
+        return new CsvToBeanBuilder<UserRatingDto>(fileReader)
                 .withType(UserRatingDto.class)
                 .withSeparator(';')
                 .withIgnoreEmptyLine(true)
                 .withSkipLines(1)
                 .build()
                 .parse();
-        return ratings;
     }
 
     public void saveRatings(final MultipartFile file) throws IOException {
         List<UserRatingDto> userRatingDtos = uploadRatings(file);
-        getBatches(userRatingDtos, 5000).forEach(this::processBatch);
+        List<CompletableFuture<Void>> callables = new ArrayList<>();
+        ServiceUtil.getBatches(userRatingDtos, 1000).forEach(userRatings -> {
+            callables.add(createTask(userRatings));
+        });
+
+        for (CompletableFuture<Void> callable : callables) {
+        }
+    }
+
+    private CompletableFuture<Void> createTask(List<UserRatingDto> userRatingDtos) {
+        return CompletableFuture.supplyAsync(() -> {
+            String uuid = UUID.randomUUID().toString();
+            System.out.println(">>>>>>>>>>>>>>>>>>>> execution started, id: " + uuid);
+            processBatch(userRatingDtos);
+            System.out.println(">>>>>>>>>>>>>>>>>>>> execution ended, id: " + uuid);
+            return null;
+        }, executor);
     }
 
     private void processBatch(List<UserRatingDto> userRatingBatch) {
-
         List<Long> userIds = userRatingBatch.stream()
                 .map(UserRatingDto::getUserId).collect(Collectors.toList());
         List<UserEntity> users = userRepository.findAllByIdIn(userIds);
@@ -110,22 +124,11 @@ public class UserService {
             bookRating.setRating(bookRatingDto.getBookRating());
             bookRating.setUser(user);
             bookRating.setBook(book);
-            book.getRatings().add(bookRating);
-            user.getRatings().add(bookRating);
             return bookRating;
         }).filter(Objects::nonNull).collect(Collectors.toList());
 
         bookRatingRepository.saveAll(ratingsToSave);
-        bookRepository.saveAll(books.values());
-        userRepository.saveAll(users);
-
     }
 
-    public <T> List<List<T>> getBatches(List<T> collection, int batchSize) {
-        List<List<T>> batches = new ArrayList<>();
-        for (int i = 0; i < collection.size(); i += batchSize) {
-            batches.add(collection.subList(i, Math.min(i + batchSize, collection.size())));
-        }
-        return batches;
-    }
+
 }

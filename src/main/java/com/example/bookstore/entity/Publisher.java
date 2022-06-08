@@ -1,52 +1,47 @@
 package com.example.bookstore.entity;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "publisher", schema = "bookstore")
 public class Publisher implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long publisherId;
+    private long id;
     @Column(name = "publisher_name")
     private String publisherName;
+    @OneToMany(cascade = CascadeType.ALL)
+    private Set<Book> book = new HashSet<>();
 
-    public Publisher(){
+    public Publisher() {
 
     }
-    public Publisher(String name){
+
+
+    public Publisher(String name) {
         this.publisherName = name;
     }
 
-
-    public long getPublisherId() {
-        return publisherId;
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Publisher publisher = (Publisher) o;
+        return id == publisher.id && publisherName.equals(publisher.publisherName);
     }
 
-    public void setPublisherId(long publisherId) {
-        this.publisherId = publisherId;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, publisherName);
     }
-
-    public String getPublisherName() {
-        return publisherName;
-    }
-
-    public void setPublisherName(String publisherName) {
-        this.publisherName = publisherName;
-    }
-
-    public Set<Book> getBook() {
-        return book;
-    }
-
-    public void setBook(Set<Book> book) {
-        this.book = book;
-    }
-
-    @OneToMany(cascade = CascadeType.ALL)
-    private Set<Book> book = new HashSet<>();
 }

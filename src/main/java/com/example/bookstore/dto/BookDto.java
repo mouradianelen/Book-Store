@@ -3,73 +3,45 @@ package com.example.bookstore.dto;
 
 import com.example.bookstore.entity.Author;
 import com.example.bookstore.entity.Book;
+import com.example.bookstore.entity.Genre;
 import com.example.bookstore.entity.Publisher;
+import lombok.Getter;
+import lombok.Setter;
 
 import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
+@Getter
+@Setter
 public class BookDto {
 
     private String ISBN;
     @NotNull
     private String title;
     private String medium_url;
+    private String large_url;
+    private String small_url;
     private String publisher;
+    private int pageCount;
+    private List<String> genre;
     @NotNull
-    private String author;
+    private List<String> authors;
 
     public BookDto(){
 
     }
 
-    public String getISBN() {
-        return ISBN;
-    }
-
-    public void setISBN(String ISBN) {
-        this.ISBN = ISBN;
-    }
-
-    public String getTitle() {
-        return title;
-    }
-
-    public void setTitle(String title) {
-        this.title = title;
-    }
-
-    public String getMedium_url() {
-        return medium_url;
-    }
-
-    public void setMedium_url(String medium_url) {
-        this.medium_url = medium_url;
-    }
-
-    public String getPublisher() {
-        return publisher;
-    }
-
-    public void setPublisher(String publisher) {
-        this.publisher = publisher;
-    }
-
-    public String getAuthor() {
-        return author;
-    }
-
-    public void setAuthor(String author) {
-        this.author = author;
-    }
 
     public static BookDto mapBookEntityToBookDto(Book book) {
         BookDto bookDto = new BookDto();
         bookDto.setISBN(book.getISBN());
         bookDto.setTitle(book.getTitle());
         bookDto.setMedium_url(book.getImageURLM());
-        bookDto.setAuthor(book.getAuthors().iterator().next().getName());
+        bookDto.setAuthors(book.getAuthors().stream().map(Author::getName).collect(Collectors.toList()));
         bookDto.setPublisher(book.getPublisher().getPublisherName());
+        bookDto.setPageCount(book.getPageCount());
+        bookDto.setGenre(book.getGenres().stream().map(Genre::getName).collect(Collectors.toList()));
 
         return bookDto;
     }
@@ -83,12 +55,10 @@ public class BookDto {
 
     public static Book mapBookDtoToBookEntity(BookDto bookDto) {
         Book book = new Book();
-        Author author = new Author();
-        author.setName(bookDto.getAuthor());
         book.setTitle(bookDto.getTitle());
         book.setImageURLM(bookDto.getMedium_url());
-        book.addAuthor(author);
-        author.getBooks().add(book);
+        book.setImageURLS(bookDto.getSmall_url());
+        book.setPageCount(bookDto.getPageCount());
         book.setPublisher(new Publisher(bookDto.getPublisher()));
         book.setISBN(bookDto.getISBN());
 

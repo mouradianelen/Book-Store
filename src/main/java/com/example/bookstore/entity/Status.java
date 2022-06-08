@@ -6,4 +6,3 @@ public enum Status {
     FAILED,
     NOT_DOWNLOADED
 }
-//DEFAULT NOT DOWNLOADED

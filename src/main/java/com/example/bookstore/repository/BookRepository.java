@@ -11,36 +11,37 @@ import java.util.List;
 import java.util.Optional;
 
 public interface BookRepository extends JpaRepository<Book, String> {
-    @Query(
-            value = "SELECT * FROM bookstore.book b  WHERE b.book_isbn = :isbn",
-            nativeQuery = true)
-    Optional<Book> findByISBN(String isbn);
 
     List<Optional<Book>> findAllByISBNIn(Iterable<String> isbns);
 
     @Query(value = "SELECT ba.author_id, b.book_title\n" +
-            "FROM bookstore.book_author ba JOIN bookstore.book b ON ba.book_id = b.book_id" +
-            "    JOIN bookstore.author a ON ba.author_id = a.author_id\n" +
-            "WHERE b.book_id IN (SELECT c.book_id\n" +
+            "FROM bookstore.book_author ba JOIN bookstore.book b ON ba.book_id = b.id" +
+            "    JOIN bookstore.author a ON ba.author_id = a.id\n" +
+            "WHERE b.id IN (SELECT c.book_id\n" +
             "                    FROM bookstore.book_author c\n" +
             "                    GROUP BY c.book_id\n" +
             "                    HAVING count(c.book_id) > 1)",
             nativeQuery = true)
     Page<Book> findBooksWithMoreThanOneAuthor(Pageable paging);
 
-//    @Query(value = "SELECT r.book_id, b.*, AVG(r.rating) as average_rating\n" +
-//            "FROM bookstore.book b\n" +
-//            "INNER JOIN bookstore.book_rating as r ON r.book_id = b.book_id\n" +
-//            "GROUP BY b.book_id,r.book_id \n" +
-//            "ORDER BY average_rating DESC\n" +
-//            "LIMIT 20", nativeQuery = true)
-@Query(value = "SELECT r.book_id, b.*, AVG(r.rating) as average_rating\n" +
-        "FROM bookstore.book b\n" +
-        "INNER JOIN bookstore.book_rating as r ON r.book_id = b.book_id\n" +
-        "GROUP BY b.book_id,r.book_id \n" +
-        "ORDER BY average_rating DESC\n" +
-        "LIMIT 20", nativeQuery = true)
-List<Book> findMostPopular();
+    @Query(value = "SELECT r.book_id, b.*, AVG(r.rating) as average_rating\n" +
+            "FROM bookstore.book b\n" +
+            "INNER JOIN bookstore.book_rating as r ON r.book_id = b.id\n" +
+            "GROUP BY b.id,r.book_id \n" +
+            "ORDER BY average_rating DESC\n" +
+            "LIMIT 20", nativeQuery = true)
+    List<Book> findMostPopular();
+
+    @Query(value = "select * from bookstore.book b where b.book_title=:title" +
+            " limit 1", nativeQuery = true)
+    Book findByTitle(String title);
+
+    @Query("select b from Book b inner join Genre g on b.id= g.book.id" +
+            " where g.name=:genreName")
+    Page<Book> findBooksByGenre(String genreName, Pageable paging);
+
+    @Query("select distinct b from Book b join b.authors authors join authors.books where authors.name=:author")
+    Page<Book> findBooksByAuthor(String author, Pageable paging);
 
 
 }

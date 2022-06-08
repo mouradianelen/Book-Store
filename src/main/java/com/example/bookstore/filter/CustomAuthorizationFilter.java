@@ -6,6 +6,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.Claim;
 import com.auth0.jwt.interfaces.DecodedJWT;
 import com.example.bookstore.repository.UserRepository;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,8 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 public class CustomAuthorizationFilter extends BasicAuthenticationFilter {
 
     private final UserRepository userRepository;
+    @Value("${security.key}")
+    private String secretKey;
 
     public CustomAuthorizationFilter(AuthenticationManager authenticationManager, UserRepository userRepository) {
         super(authenticationManager);
@@ -50,7 +53,7 @@ public class CustomAuthorizationFilter extends BasicAuthenticationFilter {
     private Authentication getAuthentication(HttpServletRequest request){
         String token = request.getHeader("authorization").replace("Bearer ","");
         if(token != null){
-            DecodedJWT jwt = JWT.require(HMAC512("BlueTeam".getBytes()))
+            DecodedJWT jwt = JWT.require(HMAC512("i8le034BTC".getBytes()))
                     .build().verify(token);
             String username = jwt.getSubject();
             Claim claim = jwt.getClaim("authorities");

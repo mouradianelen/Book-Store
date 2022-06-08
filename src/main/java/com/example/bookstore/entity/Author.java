@@ -1,22 +1,28 @@
 package com.example.bookstore.entity;
 
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "author", schema = "bookstore")
 public class Author implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private long authorId;
+    private long id;
 
     @Column(nullable = false)
     private String name;
 
-    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.MERGE)
     @JoinTable(name = "book_author", schema = "bookstore",
             joinColumns = @JoinColumn(name = "author_id"),
             inverseJoinColumns = @JoinColumn(name = "book_id"))
@@ -26,29 +32,22 @@ public class Author implements Serializable {
 
     }
 
-    public long getAuthorId() {
-        return authorId;
-    }
-
-    public void setAuthorId(long authorId) {
-        this.authorId = authorId;
-    }
-    public void addBook(Book book){
+    public void addBook(Book book) {
         this.books.add(book);
     }
-    public String getName() {
-        return name;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Author author = (Author) o;
+        return id == author.id && name.equals(author.name);
     }
 
-    public void setName(String name) {
-        this.name = name;
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name);
     }
 
-    public Set<Book> getBooks() {
-        return books;
-    }
 
-    public void setBooks(Set<Book> books) {
-        this.books = books;
-    }
 }

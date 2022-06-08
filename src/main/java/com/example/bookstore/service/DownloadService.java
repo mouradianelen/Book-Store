@@ -3,8 +3,8 @@ package com.example.bookstore.service;
 import com.example.bookstore.entity.Image;
 import com.example.bookstore.entity.Status;
 import com.example.bookstore.repository.ImageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
@@ -17,17 +17,13 @@ import java.sql.Timestamp;
 import java.util.List;
 
 @Service
+@RequiredArgsConstructor
 public class DownloadService {
     private final ImageService imageService;
     private final ImageRepository imageRepository;
     @Value("${images.location}")
     private String basePath;
 
-
-    public DownloadService(ImageService imageService, ImageRepository imageRepository) {
-        this.imageService = imageService;
-        this.imageRepository = imageRepository;
-    }
 
 //    @Scheduled(fixedRate = 3000)
 
@@ -43,8 +39,7 @@ public class DownloadService {
                 image.setStatus(Status.FAILED);
                 continue;
             }
-//            imageService.updateImage(image.getId());
-            imageService.updateImageStatus(image.getId(),Status.DOWNLOADED);
+            imageService.updateImageStatus(image.getId(), Status.DOWNLOADED);
             imageService.updateDownloadEnd(image.getId(), new Timestamp(System.currentTimeMillis()));
             System.out.println(">>>>>>>>>>>>>>>> image downloaded, image id = " + image.getId());
         }

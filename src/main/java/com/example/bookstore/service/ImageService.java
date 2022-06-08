@@ -3,6 +3,7 @@ package com.example.bookstore.service;
 import com.example.bookstore.entity.Image;
 import com.example.bookstore.entity.Status;
 import com.example.bookstore.repository.ImageRepository;
+import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -16,42 +17,40 @@ import java.util.List;
 
 @Service
 @Transactional
+@RequiredArgsConstructor
 public class ImageService {
-
 
     private final ImageRepository imageRepository;
 
-    public ImageService(ImageRepository imageRepository) {
-        this.imageRepository = imageRepository;
-    }
 
     @Transactional
-    public Image updateImageStatus(long id, Status status) {
+    public void updateImageStatus(long id, Status status) {
         Image image = imageRepository.findById(id);
         image.setStatus(status);
-        return imageRepository.save(image);
+        imageRepository.save(image);
     }
 
     @Transactional
-    public Image updateDownloadStart(long id, Timestamp timestamp) {
+    public void updateDownloadStart(long id, Timestamp timestamp) {
         Image image = imageRepository.findById(id);
         image.setDownloadStart(timestamp);
-        return imageRepository.save(image);
+        imageRepository.save(image);
     }
 
     @Transactional
-    public Image updateDownloadEnd(long id, Timestamp timestamp) {
+    public void updateDownloadEnd(long id, Timestamp timestamp) {
         Image image = imageRepository.findById(id);
         image.setDownloadEnd(timestamp);
-        return imageRepository.save(image);
+        imageRepository.save(image);
     }
-    public List<Image> getImagesPage(int pageNo,int pageSize,String sortBy){
+
+    public List<Image> getImagesPage(int pageNo, int pageSize, String sortBy) {
         Pageable paging = PageRequest.of(pageNo, pageSize, Sort.by(sortBy));
         Page<Image> pagedResult = imageRepository.findAll(paging);
-        if(pagedResult.hasContent())
+        if (pagedResult.hasContent())
             return pagedResult.getContent();
         else
-            return new ArrayList<Image>();
+            return new ArrayList<>();
 
     }
 

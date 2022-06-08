@@ -1,14 +1,19 @@
 package com.example.bookstore.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.io.Serializable;
 import java.util.HashSet;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "store_user", schema = "bookstore")
 public class UserEntity implements Serializable {
-    @OneToMany(mappedBy = "user",fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
     Set<BookRating> ratings = new HashSet<>();
     @OneToMany(mappedBy = "user")
     Set<BookOrder> orders = new HashSet<>();
@@ -33,7 +38,7 @@ public class UserEntity implements Serializable {
     private String password;
     @Column
     private Boolean enabled = false;
-    @ManyToMany(fetch = FetchType.EAGER,cascade = CascadeType.MERGE)
+    @ManyToMany(cascade = CascadeType.MERGE, fetch = FetchType.EAGER)
     @JoinTable(name = "user_role", schema = "bookstore",
             joinColumns = @JoinColumn(name = "user_id"),
             inverseJoinColumns = @JoinColumn(name = "role_id"))
@@ -43,111 +48,17 @@ public class UserEntity implements Serializable {
 
     }
 
-    public Set<UserRole> getRoles() {
-        return roles;
-    }
-
-    public void setRoles(Set<UserRole> roles) {
-        this.roles = roles;
-    }
-    public void setRole(UserRole role){
-        this.roles.add(role);
-    }
-
-    public Set<BookOrder> getOrders() {
-        return orders;
-    }
-
-    public void setOrders(Set<BookOrder> orders) {
-        this.orders = orders;
-    }
-
-    public boolean isEnabled() {
+    public Boolean isEnabled() {
         return enabled;
     }
 
-    public void setEnabled(boolean enabled) {
+    public void setEnabled(Boolean enabled) {
         this.enabled = enabled;
     }
 
-    public Set<BookRating> getRatings() {
-        return ratings;
-    }
-
-    public void setRatings(Set<BookRating> ratings) {
-        this.ratings = ratings;
+    public void setRole(UserRole role) {
+        this.roles.add(role);
     }
 
 
-    public long getId() {
-        return id;
-    }
-
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(long userId) {
-        this.userId = userId;
-    }
-
-    public int getAge() {
-        return age;
-    }
-
-    public void setAge(int age) {
-        this.age = age;
-    }
-
-    public String getLocation() {
-        return location;
-    }
-
-    public void setLocation(String location) {
-        this.location = location;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getLastName() {
-        return lastName;
-    }
-
-    public void setLastName(String lastName) {
-        this.lastName = lastName;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getUsername() {
-        return username;
-    }
-
-    public void setUsername(String username) {
-        this.username = username;
-    }
-
-    public void setEmail(String email) {
-        this.email = email;
-    }
-
-    public String getPassword() {
-        return password;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
-    }
 }

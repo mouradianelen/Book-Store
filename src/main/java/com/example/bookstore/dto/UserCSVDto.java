@@ -3,7 +3,6 @@ package com.example.bookstore.dto;
 import com.example.bookstore.entity.UserEntity;
 import com.opencsv.bean.CsvBindByPosition;
 
-import javax.validation.constraints.NotNull;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -29,10 +28,10 @@ public class UserCSVDto {
 
 
     public void setAge(String age){
-        if(age.equals("NULL"))
+        if(age.startsWith("NULL"))
             this.setAge("18");
         else{
-        this.age = age;
+        this.age = age.substring(0,2);
         }
     }
 

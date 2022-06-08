@@ -4,6 +4,7 @@ import com.auth0.jwt.algorithms.Algorithm;
 import com.example.bookstore.security.UserDetailsImpl;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -29,6 +30,8 @@ import static com.auth0.jwt.algorithms.Algorithm.HMAC512;
 public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 
     private final AuthenticationManager authenticationManager;
+    @Value("${security.key}")
+    private String secretKey;
 
     public CustomAuthenticationFilter(AuthenticationManager authenticationManager) {
         this.authenticationManager = authenticationManager;
@@ -51,7 +54,7 @@ public class CustomAuthenticationFilter extends UsernamePasswordAuthenticationFi
     @Override
     protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication authentication) throws IOException, ServletException {
         UserDetailsImpl user = (UserDetailsImpl) authentication.getPrincipal();
-        Algorithm algorithm = HMAC512("BlueTeam".getBytes());
+        Algorithm algorithm = HMAC512("i8le034BTC".getBytes());
         List<String> list = user.getAuthorities().stream().map(GrantedAuthority::getAuthority).collect(Collectors.toList());
         String accessToken = JWT.create()
                 .withSubject(user.getUsername())

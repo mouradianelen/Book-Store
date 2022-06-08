@@ -1,8 +1,13 @@
 package com.example.bookstore.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.sql.Date;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "book_order", schema = "bookstore")
 public class BookOrder {
@@ -19,39 +24,9 @@ public class BookOrder {
     @Column
     private Date orderDate;
 
-    public BookOrder(){
+    public BookOrder() {
 
     }
 
-    public long getId() {
-        return id;
-    }
 
-    public void setId(long id) {
-        this.id = id;
-    }
-
-    public Book getBook() {
-        return book;
-    }
-
-    public void setBook(Book book) {
-        this.book = book;
-    }
-
-    public UserEntity getUser() {
-        return user;
-    }
-
-    public void setUser(UserEntity user) {
-        this.user = user;
-    }
-
-    public Date getOrderDate() {
-        return orderDate;
-    }
-
-    public void setOrderDate(Date orderDate) {
-        this.orderDate = orderDate;
-    }
 }

@@ -1,10 +1,15 @@
 package com.example.bookstore.entity;
 
+import lombok.Getter;
+import lombok.Setter;
+
 import javax.persistence.*;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.Set;
 
+@Getter
+@Setter
 @Entity
 @Table(name = "role", schema = "bookstore")
 public class UserRole {
@@ -19,29 +24,6 @@ public class UserRole {
     public UserRole() {
     }
 
-    public Set<UserEntity> getUsers() {
-        return users;
-    }
-
-    public void setUsers(Set<UserEntity> users) {
-        this.users = users;
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
-
-    public String getName() {
-        return name;
-    }
-
-    public void setName(String name) {
-        this.name = name;
-    }
 
     @Override
     public boolean equals(Object o) {
