@@ -131,7 +131,8 @@ public class BookService {
             throw new BookNotFoundException();
         if (genre == null)
             throw new GenreNotFoundException();
-        genre.setBook(book);
+        book.getGenres().add(genre);
+        genre.getBooks().add(book);
         return assignGenreDto;
     }
 

@@ -36,8 +36,7 @@ public interface BookRepository extends JpaRepository<Book, String> {
             " limit 1", nativeQuery = true)
     Book findByTitle(String title);
 
-    @Query("select b from Book b inner join Genre g on b.id= g.book.id" +
-            " where g.name=:genreName")
+    @Query("select distinct b from Book b join b.genres genres join genres.books where genres.name=:genreName")
     Page<Book> findBooksByGenre(String genreName, Pageable paging);
 
     @Query("select distinct b from Book b join b.authors authors join authors.books where authors.name=:author")

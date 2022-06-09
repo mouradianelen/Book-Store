@@ -5,6 +5,8 @@ import lombok.Setter;
 
 import javax.persistence.*;
 import java.io.Serializable;
+import java.util.LinkedList;
+import java.util.List;
 import java.util.Objects;
 
 @Getter
@@ -19,9 +21,11 @@ public class Genre implements Serializable {
     private String genreDescription;
     @Column(name = "genre_name")
     private String name;
-    @ManyToOne
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @ManyToMany
+    @JoinTable(name = "book_genre", schema = "bookstore",
+            joinColumns = @JoinColumn(name = "genre_id"),
+            inverseJoinColumns = @JoinColumn(name = "book_id"))
+    private List<Book> books = new LinkedList<>();
 
     public Genre() {
 

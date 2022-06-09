@@ -33,8 +33,8 @@ public class Book implements Serializable {
     private String imageURLM;
     @Column(name = "page_count")
     private int pageCount;
-    @OneToMany(cascade = CascadeType.ALL)
-    private Set<Genre> genres = new HashSet<>();
+    @ManyToMany(mappedBy = "books")
+    private List<Genre> genres = new LinkedList<>();
     @ManyToOne(cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     @JoinColumn(name = "publisher_id")
     private Publisher publisher;
